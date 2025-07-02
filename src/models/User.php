@@ -5,12 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 class User extends Model
 {
     protected $table = 'EVNeoUsers';
+    protected $primaryKey = 'Id';
 
     protected $fillable = [
         'BhrNumber',
         'FirstName',
         'MiddleName',
-        'Nickname',
+        'LastName',
+        'PreferredName',
         'BirthDate',
         'Gender',
         'MaritalStatus',
@@ -23,8 +25,7 @@ class User extends Model
         'MobileNumber',
         'HomePhone',
         'PersonalEmail',
-        'LastName',
-        'Department',
+        'DepartmentId',
         'Workemail',
         'DateHired',
         'GDriveFolderId',
@@ -41,14 +42,16 @@ class User extends Model
         'Guid',
         'IsFormSubmited',
         'SubmitedCount',
-        'PreferredName',
         'IsApproved',
     ];
 
-    public $timestamps = false;
+    public $timestamps = true;
+
+    const CREATED_AT = 'CreatedAt';
+    const UPDATED_AT = 'UpdatedAt';
 
     public function department()
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->belongsTo(Department::class, 'DepartmentId');
     }
 }

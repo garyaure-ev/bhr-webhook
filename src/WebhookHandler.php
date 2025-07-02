@@ -7,6 +7,7 @@ require_once __DIR__ . '/models/Department.php';
 
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Database\Capsule\Manager as DB;
 
 function handleWebhook(array $payload, $logger): string
 {
@@ -26,19 +27,20 @@ function handleWebhook(array $payload, $logger): string
 
             $fields = $employee['fields'];
 
-            $departmentName = $fields['Job Information - Department'] ?? null; // Optional, may not exist in this payload
+            $departmentName = $fields['department'] ?? null; // Optional, may not exist in this payload
             $departmentId = null;
 
             if ($departmentName) {
-                $department = Department::firstOrCreate(['name' => $departmentName]);
+                $department = Department::firstOrCreate(['Name' => $departmentName]);
                 $departmentId = $department->id;
+                $logger->info('Department', [$department]);
             }
 
             $userData = [
                 'BhrNumber' => $employee['id'] ?? null,
                 'FirstName' => $fields['first_name'] ?? '',
                 'MiddleName' => $fields['middle_name'] ?? '',
-                'LastName' => $fields['last_nName'] ?? '',
+                'LastName' => $fields['last_name'] ?? '',
                 'PreferredName' => $fields['preferred_name'] ?? '',
                 'BirthDate' => isset($fields['birth_date']) ? Carbon::parse($fields['birth_date']) : null,
                 'Gender' => $fields['gender'] ?? '',
@@ -68,11 +70,6 @@ function handleWebhook(array $payload, $logger): string
                 'CountryId' => $fields['country_id'] ?? null,
             ];
 
-            if (empty($userData['BhrNumber'])) {
-                $logger->warning('Skipping user without BhrNumber', ['userData' => $userData]);
-                continue;
-            }
-
             // Create or update the user
             $createOnlyFields = [
                 'Guid' => Str::uuid()->toString(),
@@ -81,23 +78,42 @@ function handleWebhook(array $payload, $logger): string
                 'IsApproved' => 0,
             ];
 
+            $logger->info('New Data', [$userData]);
+
+            if (empty($userData['BhrNumber'])) {
+                $logger->warning('Skipping user without BhrNumber', ['userData' => $userData]);
+                continue;
+            }
+
             // Merge into $userData only if we're creating
             $user = User::firstOrNew(['BhrNumber' => $userData['BhrNumber']]);
+
+            $logger->info('User Instance', [$user]);
 
             // If it's a new record, assign create-only fields
             if (!$user->exists) {
                 $user->fill($createOnlyFields);
+            } else {
+                $logger->info('Updating existing user.', ['user_id' => $user->id]);
             }
 
             // Fill shared/updateable fields
             $user->fill($userData);
 
-            // Save the model
+            // Enable query log
+            DB::connection()->enableQueryLog();
+
+            // Perform actions (e.g., saving)
             $user->save();
+
+            // Get the queries
+            $queries = DB::getQueryLog();
+            $logger->info('SQL Queries', $queries);
+
+            $logger->info('User Updated Instance', [$user]);
 
             $logger->info('User record created/updated.', ['user_id' => $user->Id]);
         }
-
         return 'received';
     } catch (\Exception $e) {
         $logger->error('Webhook error: ' . $e->getMessage());

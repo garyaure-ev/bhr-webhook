@@ -7,6 +7,8 @@ class Department extends Model
 {
     protected $table = 'EVNeoDepartments';
 
+    protected $primaryKey = 'Id';
+
     protected $fillable = ['Name'];
 
     public $timestamps = true;

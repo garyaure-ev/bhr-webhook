@@ -2,25 +2,43 @@
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-if (!Capsule::schema()->hasTable('users')) {
-    Capsule::schema()->create('users', function ($table) {
-        $table->increments('id');
-        $table->string('bhr_number')->unique();
-        $table->string('first_name')->nullable();
-        $table->string('middle_name')->nullable();
-        $table->string('last_name')->nullable();
-        $table->unsignedInteger('department_id')->nullable();
-        $table->string('email')->nullable();
-        $table->string('country')->nullable();
-        $table->timestamp('date_hired')->nullable();
-        $table->string('drive_folder_id')->nullable();
-        $table->integer('origin')->nullable();
-        $table->boolean('is_first_job')->nullable();
-        $table->timestamp('terms_and_conditions_ticked_at')->nullable();
-        $table->timestamp('privacy_policy_ticked_at')->nullable();
-        $table->boolean('is_completed')->default(false);
-        $table->timestamp('deleted_at')->nullable();
-        $table->timestamp('created_at')->nullable();
-        $table->timestamp('updated_at')->nullable();
+if (!Capsule::schema()->hasTable('EVNeoUsers')) {
+    Capsule::schema()->create('EVNeoUsers', function ($table) {
+        $table->increments('Id');
+        $table->integer('BhrNumber');
+        $table->longText('FirstName');
+        $table->longText('MiddleName');
+        $table->longText('LastName');
+        $table->longText('PreferredName');
+        $table->dateTime('BirthDate', 6)->nullable();
+        $table->longText('Gender');
+        $table->longText('MaritalStatus');
+        $table->longText('AddressLine1');
+        $table->longText('AddressLine2');
+        $table->longText('City');
+        $table->longText('ProvinceState');
+        $table->integer('ZipCode')->nullable();
+        $table->longText('Country');
+        $table->longText('MobileNumber');
+        $table->longText('HomePhone');
+        $table->longText('PersonalEmail');
+        $table->integer('DepartmentId')->nullable();
+        $table->longText('Workemail');
+        $table->dateTime('DateHired', 6)->nullable();
+        $table->longText('GDriveFolderId');
+        $table->integer('CurrentStep');
+        $table->boolean('IsCompleted');
+        $table->integer('Origin')->nullable();
+        $table->boolean('IsFirstJob')->nullable();
+        $table->dateTime('TermsAndConditionsTickedAt', 6)->nullable();
+        $table->dateTime('PrivacyPolicyTickedAt', 6)->nullable();
+        $table->dateTime('DeletedAt', 6)->nullable();
+        $table->dateTime('CreatedAt', 6)->nullable();
+        $table->dateTime('UpdatedAt', 6)->nullable();
+        $table->integer('CountryId')->nullable();
+        $table->char('Guid', 36);
+        $table->boolean('IsFormSubmited');
+        $table->integer('SubmitedCount');
+        $table->boolean('IsApproved');
     });
 }

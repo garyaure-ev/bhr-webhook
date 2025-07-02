@@ -5,9 +5,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Department extends Model
 {
-    protected $table = 'departments';
+    protected $table = 'EVNeoDepartments';
 
-    protected $fillable = ['name'];
+    protected $fillable = ['Name'];
 
     public $timestamps = true;
 

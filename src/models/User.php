@@ -4,26 +4,45 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
-    protected $table = 'users';
+    protected $table = 'EVNeoUsers';
 
     protected $fillable = [
-        'bhr_number',
-        'first_name',
-        'middle_name',
-        'last_name',
-        'department_id',
-        'email',
-        'country',
-        'date_hired',
-        'drive_folder_id',
-        'origin',
-        'is_first_job',
-        'terms_and_conditions_ticked_at',
-        'privacy_policy_ticked_at',
-        'is_completed',
-        'deleted_at',
-        'created_at',
-        'updated_at'
+        'BhrNumber',
+        'FirstName',
+        'MiddleName',
+        'Nickname',
+        'BirthDate',
+        'Gender',
+        'MaritalStatus',
+        'AddressLine1',
+        'AddressLine2',
+        'City',
+        'ProvinceState',
+        'ZipCode',
+        'Country',
+        'MobileNumber',
+        'HomePhone',
+        'PersonalEmail',
+        'LastName',
+        'Department',
+        'Workemail',
+        'DateHired',
+        'GDriveFolderId',
+        'CurrentStep',
+        'IsCompleted',
+        'Origin',
+        'IsFirstJob',
+        'TermsAndConditionsTickedAt',
+        'PrivacyPolicyTickedAt',
+        'DeletedAt',
+        'CreatedAt',
+        'UpdatedAt',
+        'CountryId',
+        'Guid',
+        'IsFormSubmited',
+        'SubmitedCount',
+        'PreferredName',
+        'IsApproved',
     ];
 
     public $timestamps = false;

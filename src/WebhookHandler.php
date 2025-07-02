@@ -6,6 +6,7 @@ require_once __DIR__ . '/models/User.php';
 require_once __DIR__ . '/models/Department.php';
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 function handleWebhook(array $payload, $logger): string
 {
@@ -34,36 +35,67 @@ function handleWebhook(array $payload, $logger): string
             }
 
             $userData = [
-                'bhr_number' => $employee['id'] ?? null,
-                'first_name' => $fields['first_name'] ?? null,
-                'middle_name' => $fields['middle_name'] ?? null,
-                'last_name' => $fields['last_nName'] ?? null,
-                'department_id' => $departmentId,
-                'email' => $fields['home_email'] ?? null,
-                'country' => $fields['country'] ?? null,
-                //'preferred_name' => $fields['preferred_name'] ?? null,
-                //'gender' => $fields['gender'] ?? null,
-                'date_hired' => isset($fields['hire_date']) ? Carbon::parse($fields['hire_date']) : null,
-                //'phone_mobile' => $fields['mobile_phone'] ?? null,
-                //'phone_home' => $fields['home_phone'] ?? null,
-                //'address' => trim(($fields['address_line_1'] ?? '') . ' ' . ($fields['address_line_2'] ?? '')),
-                //'city' => $fields['city'] ?? null,
-                //'state' => $fields['state'] ?? null,
-                //'zip' => $fields['zip_code'] ?? null,
+                'BhrNumber' => $employee['id'] ?? null,
+                'FirstName' => $fields['first_name'] ?? '',
+                'MiddleName' => $fields['middle_name'] ?? '',
+                'LastName' => $fields['last_nName'] ?? '',
+                'PreferredName' => $fields['preferred_name'] ?? '',
+                'BirthDate' => isset($fields['birth_date']) ? Carbon::parse($fields['birth_date']) : null,
+                'Gender' => $fields['gender'] ?? '',
+                'MaritalStatus' => $fields['marital_status'] ?? '',
+                'AddressLine1' => $fields['address_line_1'] ?? '',
+                'AddressLine2' => $fields['address_line_2'] ?? '',
+                'City' => $fields['city'] ?? '',
+                'ProvinceState' => $fields['state'] ?? '',
+                'ZipCode' => $fields['zip_code'] ?? null,
+                'Country' => $fields['country'] ?? '',
+                'MobileNumber' => $fields['mobile_phone'] ?? '',
+                'HomePhone' => $fields['home_phone'] ?? '',
+                'PersonalEmail' => $fields['home_email'] ?? '',
+                'DepartmentId' => $departmentId,
+                'Workemail' => $fields['work_email'] ?? '',
+                'DateHired' => isset($fields['hire_date']) ? Carbon::parse($fields['hire_date']) : null,
+                'GDriveFolderId' => $fields['gdrive_folder_id'] ?? '',
+                'CurrentStep' => $fields['current_step'] ?? 0,
+                'IsCompleted' => $fields['is_completed'] ?? 0,
+                'Origin' => $fields['origin'] ?? null,
+                'IsFirstJob' => $fields['is_first_job'] ?? null,
+                'TermsAndConditionsTickedAt' => isset($fields['terms_ticked_at']) ? Carbon::parse($fields['terms_ticked_at']) : null,
+                'PrivacyPolicyTickedAt' => isset($fields['privacy_ticked_at']) ? Carbon::parse($fields['privacy_ticked_at']) : null,
+                'DeletedAt' => isset($fields['deleted_at']) ? Carbon::parse($fields['deleted_at']) : null,
+                'CreatedAt' => isset($fields['created_at']) ? Carbon::parse($fields['created_at']) : null,
+                'UpdatedAt' => isset($fields['updated_at']) ? Carbon::parse($fields['updated_at']) : null,
+                'CountryId' => $fields['country_id'] ?? null,
             ];
 
-            if (empty($userData['bhr_number'])) {
-                $logger->warning('Skipping user without bhr_number', ['userData' => $userData]);
+            if (empty($userData['BhrNumber'])) {
+                $logger->warning('Skipping user without BhrNumber', ['userData' => $userData]);
                 continue;
             }
 
             // Create or update the user
-            $user = User::updateOrCreate(
-                ['bhr_number' => $userData['bhr_number']],
-                $userData
-            );
+            $createOnlyFields = [
+                'Guid' => Str::uuid()->toString(),
+                'IsFormSubmited' => 0,
+                'SubmitedCount' => 0,
+                'IsApproved' => 0,
+            ];
 
-            $logger->info('User record created/updated.', ['user_id' => $user->id]);
+            // Merge into $userData only if we're creating
+            $user = User::firstOrNew(['BhrNumber' => $userData['BhrNumber']]);
+
+            // If it's a new record, assign create-only fields
+            if (!$user->exists) {
+                $user->fill($createOnlyFields);
+            }
+
+            // Fill shared/updateable fields
+            $user->fill($userData);
+
+            // Save the model
+            $user->save();
+
+            $logger->info('User record created/updated.', ['user_id' => $user->Id]);
         }
 
         return 'received';
